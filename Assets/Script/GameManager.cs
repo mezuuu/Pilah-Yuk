@@ -30,6 +30,13 @@ public class GameManager : MonoBehaviour
     public Sprite btnLanjutBg;
     public Sprite btnRestartBg;
     public Sprite btnMainMenuBg;
+    public Sprite starColored;
+    public Sprite starUncolored;
+
+    [Header("Pengaturan Bintang (Story Mode)")]
+    public Vector2 starSize = new Vector2(80f, 80f);
+    public float starSpacing = 100f; // Jarak antar bintang (Kiri, Tengah, Kanan)
+    public float starContainerY = 10f; // Posisi Naik-Turun bintang
 
     [Header("Font Settings")]
     public TMP_FontAsset customFont;
@@ -314,18 +321,50 @@ public class GameManager : MonoBehaviour
             titleTMP.color = isWin ? new Color(0.2f, 0.9f, 0.4f, 1f) : new Color(0.95f, 0.3f, 0.3f, 1f);
         }
 
-        GameObject scoreObj = new GameObject("ScoreInfo");
-        scoreObj.transform.SetParent(boardObj.transform, false);
-        RectTransform scoreRect = scoreObj.AddComponent<RectTransform>();
-        scoreRect.anchoredPosition = new Vector2(0f, 10f); // Posisi text agak ke tengah
-        scoreRect.sizeDelta = new Vector2(500f, 100f);
+        if (GameModeManager.currentMode == GameModeManager.GameMode.Chapter)
+        {
+            // Tampilkan Bintang untuk Story Mode
+            GameObject starsContainer = new GameObject("StarsContainer");
+            starsContainer.transform.SetParent(boardObj.transform, false);
+            RectTransform starsRect = starsContainer.AddComponent<RectTransform>();
+            starsRect.anchoredPosition = new Vector2(0f, starContainerY); // Menggunakan settingan inspector
+            starsRect.sizeDelta = new Vector2(300f, 100f);
 
-        TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
-        scoreTMP.text = "Skor Kamu: <color=#FFD700>" + score + "</color>\nHigh Skor: <color=#FFA500>" + highScore + "</color>";
-        ApplyFontAndOutline(scoreTMP);
-        scoreTMP.fontSize = 32f;
-        scoreTMP.alignment = TextAlignmentOptions.Center;
-        scoreTMP.color = Color.white;
+            int starsEarned = isWin ? life : 0; 
+            if (starsEarned < 0) starsEarned = 0;
+            if (starsEarned > 3) starsEarned = 3;
+
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject starObj = new GameObject("Star_" + (i + 1));
+                starObj.transform.SetParent(starsContainer.transform, false);
+                RectTransform starRect = starObj.AddComponent<RectTransform>();
+                
+                // Menata 3 bintang berjejer: -spacing, 0, +spacing
+                starRect.anchoredPosition = new Vector2(-starSpacing + (i * starSpacing), 0f); 
+                starRect.sizeDelta = starSize; // Menggunakan settingan inspector
+
+                Image starImg = starObj.AddComponent<Image>();
+                starImg.sprite = (i < starsEarned) ? starColored : starUncolored;
+                starImg.preserveAspect = true; // Mencegah gambar gepeng
+            }
+        }
+        else
+        {
+            // Tampilkan Score untuk Endless Mode
+            GameObject scoreObj = new GameObject("ScoreInfo");
+            scoreObj.transform.SetParent(boardObj.transform, false);
+            RectTransform scoreRect = scoreObj.AddComponent<RectTransform>();
+            scoreRect.anchoredPosition = new Vector2(0f, 10f); // Posisi text agak ke tengah
+            scoreRect.sizeDelta = new Vector2(500f, 100f);
+
+            TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
+            scoreTMP.text = "Skor Kamu: <color=#FFD700>" + score + "</color>\nHigh Skor: <color=#FFA500>" + highScore + "</color>";
+            ApplyFontAndOutline(scoreTMP);
+            scoreTMP.fontSize = 32f;
+            scoreTMP.alignment = TextAlignmentOptions.Center;
+            scoreTMP.color = Color.white;
+        }
 
         GameObject btnContainer = new GameObject("Buttons");
         btnContainer.transform.SetParent(boardObj.transform, false);
