@@ -76,6 +76,10 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+        
+        // Adaptive FPS hingga 165Hz
+        QualitySettings.vSyncCount = 0; 
+        Application.targetFrameRate = 165;
     }
     public GameObject floatingTextPrefab;
 

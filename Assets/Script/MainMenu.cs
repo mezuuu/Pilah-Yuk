@@ -64,6 +64,13 @@ public class MainMenu : MonoBehaviour
         catch { }
     }
 
+    void Awake()
+    {
+        // Adaptive FPS hingga 165Hz
+        QualitySettings.vSyncCount = 0; 
+        Application.targetFrameRate = 165;
+    }
+
     void Start()
     {
         // Fitur ini dimatikan agar tidak mengubah font teks lain (seperti Dialog) secara otomatis
