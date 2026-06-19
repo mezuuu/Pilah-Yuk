@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
     [Header("Pengaturan Bintang (Story Mode)")]
     public Vector2 starSize = new Vector2(80f, 80f);
     public float starSpacing = 100f; // Jarak antar bintang (Kiri, Tengah, Kanan)
-    public float starContainerY = 10f; // Posisi Naik-Turun bintang
+    public float starContainerY = -120f; // [DIPERBARUI] Diturunkan agar tidak nabrak judul
 
     [Header("Font Settings")]
     public TMP_FontAsset customFont;
@@ -77,7 +77,6 @@ public class GameManager : MonoBehaviour
     {
         instance = this;
     }
-
     public GameObject floatingTextPrefab;
 
     public void ApplyFontAndOutline(TMP_Text tmp)
@@ -137,7 +136,6 @@ public class GameManager : MonoBehaviour
             if (GameModeManager.currentChapter == 1) bgToUse = chapter1Background;
             else if (GameModeManager.currentChapter == 2) bgToUse = chapter2Background;
             else if (GameModeManager.currentChapter == 3) bgToUse = chapter3Background;
-            // Jika butuh lebih banyak chapter, bisa ditambah di sini
         }
 
         if (bgToUse != null)
@@ -146,7 +144,7 @@ public class GameManager : MonoBehaviour
             if (spriteBackground != null) 
             {
                 spriteBackground.sprite = bgToUse;
-                spriteBackground.sortingOrder = -50; // Paksa render di belakang semua objek game
+                spriteBackground.sortingOrder = -50; 
             }
         }
     }
@@ -171,7 +169,7 @@ public class GameManager : MonoBehaviour
 
         if (GameModeManager.currentMode == GameModeManager.GameMode.Chapter)
         {
-            int targetScore = GameModeManager.currentChapter * 150; // Ch 1 = 150, Ch 2 = 300, dst.
+            int targetScore = GameModeManager.currentChapter * 150; 
             if (score >= targetScore)
             {
                 Victory();
@@ -253,7 +251,7 @@ public class GameManager : MonoBehaviour
     }
 
     // =========================================================================
-    // AUTO GENERATE OVERLAY 
+    // AUTO GENERATE OVERLAY (DIPERBAIKI)
     // =========================================================================
     
     void CreateModernOverlayUI(bool isWin)
@@ -279,9 +277,6 @@ public class GameManager : MonoBehaviour
         Image overlayBg = overlayObj.AddComponent<Image>();
         overlayBg.color = new Color(0f, 0f, 0f, 0.8f);
 
-        // -----------------------------------------------------------------
-        // BOARD UTAMA DISET 700x400 UNTUK SEMUA PANEL (WIN/LOSE/MODE)
-        // -----------------------------------------------------------------
         GameObject boardObj = new GameObject("Board");
         boardObj.transform.SetParent(overlayObj.transform, false);
         RectTransform boardRect = boardObj.AddComponent<RectTransform>();
@@ -295,11 +290,11 @@ public class GameManager : MonoBehaviour
         {
             boardBgImg.sprite = currentBoardBg;
             boardBgImg.type = Image.Type.Sliced;
-            boardBgImg.color = Color.white; // Pakai warna gambar asli
+            boardBgImg.color = Color.white; 
         }
         else
         {
-            boardBgImg.color = new Color(0.12f, 0.15f, 0.22f, 1f); // Warna default
+            boardBgImg.color = new Color(0.12f, 0.15f, 0.22f, 1f); 
         }
 
         if (currentBoardBg == null)
@@ -321,9 +316,11 @@ public class GameManager : MonoBehaviour
             titleTMP.color = isWin ? new Color(0.2f, 0.9f, 0.4f, 1f) : new Color(0.95f, 0.3f, 0.3f, 1f);
         }
 
+        // ==========================================
+        // PERBAIKAN: Bintang HANYA muncul di Story Mode
+        // ==========================================
         if (GameModeManager.currentMode == GameModeManager.GameMode.Chapter)
         {
-            // Tampilkan Bintang untuk Story Mode
             GameObject starsContainer = new GameObject("StarsContainer");
             starsContainer.transform.SetParent(boardObj.transform, false);
             RectTransform starsRect = starsContainer.AddComponent<RectTransform>();
@@ -342,30 +339,57 @@ public class GameManager : MonoBehaviour
                 
                 // Menata 3 bintang berjejer: -spacing, 0, +spacing
                 starRect.anchoredPosition = new Vector2(-starSpacing + (i * starSpacing), 0f); 
-                starRect.sizeDelta = starSize; // Menggunakan settingan inspector
+                starRect.sizeDelta = starSize; 
 
                 Image starImg = starObj.AddComponent<Image>();
                 starImg.sprite = (i < starsEarned) ? starColored : starUncolored;
-                starImg.preserveAspect = true; // Mencegah gambar gepeng
+                starImg.preserveAspect = true; // KUNCI AGAR GAMBAR TIDAK GEPENG
+                
+                // Tambahkan efek transparan kalau bintang kosongnya belum disetel di Unity
+                if (i >= starsEarned && starUncolored == null) 
+                {
+                    starImg.sprite = starColored;
+                    starImg.color = new Color(0.2f, 0.2f, 0.2f, 0.5f);
+                }
             }
+        }
+
+        // ==========================================
+        // PERBAIKAN: Skor SELALU muncul di semua mode
+        // ==========================================
+        GameObject scoreObj = new GameObject("ScoreInfo");
+        scoreObj.transform.SetParent(boardObj.transform, false);
+        RectTransform scoreRect = scoreObj.AddComponent<RectTransform>();
+        
+        // Posisikan skor diturunkan ke -150f (sesuai settinganmu) agar pas di bawah bintang
+        float scoreY = (GameModeManager.currentMode == GameModeManager.GameMode.Chapter) ? -150f : 10f;
+        scoreRect.anchoredPosition = new Vector2(0f, scoreY); 
+        scoreRect.sizeDelta = new Vector2(500f, 100f);
+
+        TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
+        
+        // ==========================================
+        // LOGIKA TEKS SKOR (Story Mode vs Endless)
+        // ==========================================
+        if (GameModeManager.currentMode == GameModeManager.GameMode.Chapter)
+        {
+            // Jika Story Mode (Chapter), HANYA tampilkan Skor saat ini
+            scoreTMP.text = "Skor Kamu: <color=#FFD700>" + score + "</color>";
         }
         else
         {
-            // Tampilkan Score untuk Endless Mode
-            GameObject scoreObj = new GameObject("ScoreInfo");
-            scoreObj.transform.SetParent(boardObj.transform, false);
-            RectTransform scoreRect = scoreObj.AddComponent<RectTransform>();
-            scoreRect.anchoredPosition = new Vector2(0f, 10f); // Posisi text agak ke tengah
-            scoreRect.sizeDelta = new Vector2(500f, 100f);
-
-            TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
+            // Jika Endless Mode, tampilkan Skor Kamu DAN High Skor
             scoreTMP.text = "Skor Kamu: <color=#FFD700>" + score + "</color>\nHigh Skor: <color=#FFA500>" + highScore + "</color>";
-            ApplyFontAndOutline(scoreTMP);
-            scoreTMP.fontSize = 32f;
-            scoreTMP.alignment = TextAlignmentOptions.Center;
-            scoreTMP.color = Color.white;
         }
+        
+        ApplyFontAndOutline(scoreTMP);
+        scoreTMP.fontSize = 64f;
+        scoreTMP.alignment = TextAlignmentOptions.Center;
+        scoreTMP.color = Color.white;
 
+        // ==========================================
+        // TOMBOL-TOMBOL
+        // ==========================================
         GameObject btnContainer = new GameObject("Buttons");
         btnContainer.transform.SetParent(boardObj.transform, false);
         RectTransform btnRect = btnContainer.AddComponent<RectTransform>();
@@ -440,8 +464,8 @@ public class GameManager : MonoBehaviour
     public void NextChapter()
     {
         Time.timeScale = 1f;
-        GameModeManager.currentChapter++; // Naikkan angka chapter (ke 2, 3, dst)
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Muat ulang scene dengan setting chapter baru
+        GameModeManager.currentChapter++; 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); 
     }
 
     public void RestartGame()
@@ -453,6 +477,9 @@ public class GameManager : MonoBehaviour
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
+        
+        DialogManager.hasSeenProlog = false; 
+        
         SceneManager.LoadScene("MainMenu");
     }
 }
