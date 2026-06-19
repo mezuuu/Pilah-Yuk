@@ -21,17 +21,18 @@ public class MainMenu : MonoBehaviour
     public Sprite btnBackBg;
 
     [Header("Pengaturan Tata Letak (Ubah Posisi & Ukuran)")]
-    public Vector2 customBoardSize = new Vector2(700f, 400f);
+    public Vector2 customBoardSize = new Vector2(1400f, 800f);
+    public float customBoardPosX = 45f;
 
     [Header("Posisi Tombol (X, Y)")]
     public Vector2 storyButtonPos = new Vector2(-2f, 20f);
-    public Vector2 endlessButtonPos = new Vector2(3.4f, -49f);
-    public Vector2 backButtonPos = new Vector2(-5f, -114f);
+    public Vector2 endlessButtonPos = new Vector2(3.4f, -92f);
+    public Vector2 backButtonPos = new Vector2(-5f, -206f);
 
     [Header("Ukuran Tombol (Width, Height)")]
-    public Vector2 storyButtonSize = new Vector2(400f, 90f);
-    public Vector2 endlessButtonSize = new Vector2(400f, 90f);
-    public Vector2 backButtonSize = new Vector2(250f, 80f);
+    public Vector2 storyButtonSize = new Vector2(600f, 150f);
+    public Vector2 endlessButtonSize = new Vector2(600f, 140f);
+    public Vector2 backButtonSize = new Vector2(450f, 140f);
 
     [Header("Skala Tombol (Scale X, Y)")]
     public Vector2 storyButtonScale = new Vector2(0.80002f, 1f);
@@ -65,11 +66,12 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        TMP_Text[] allTexts = FindObjectsOfType<TMP_Text>(true);
-        foreach(var t in allTexts)
-        {
-            ApplyFontAndOutline(t);
-        }
+        // Fitur ini dimatikan agar tidak mengubah font teks lain (seperti Dialog) secara otomatis
+        // TMP_Text[] allTexts = FindObjectsOfType<TMP_Text>(true);
+        // foreach(var t in allTexts)
+        // {
+        //     ApplyFontAndOutline(t);
+        // }
 
         int music = PlayerPrefs.GetInt("Music", 1);
         isMusicOn = music == 1;
@@ -111,6 +113,12 @@ public class MainMenu : MonoBehaviour
         if (panelSetting != null) panelSetting.SetActive(false);
     }
 
+    public void QuitGame()
+    {
+        Debug.Log("Game Keluar...");
+        Application.Quit();
+    }
+
     // =========================================================================
     // AUTO GENERATE MODE SELECTION UI
     // =========================================================================
@@ -149,7 +157,7 @@ public class MainMenu : MonoBehaviour
         boardObj.transform.SetParent(modeSelectionOverlay.transform, false);
         RectTransform boardRect = boardObj.AddComponent<RectTransform>();
         boardRect.sizeDelta = customBoardSize; // Menggunakan variabel yang bisa diatur di inspector
-        boardRect.anchoredPosition = Vector2.zero;
+        boardRect.anchoredPosition = new Vector2(customBoardPosX, 0f);
 
         Image boardBgImg = boardObj.AddComponent<Image>();
         if (boardBackground != null)
@@ -177,7 +185,7 @@ public class MainMenu : MonoBehaviour
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "PILIH MODE GAME";
             ApplyFontAndOutline(titleTMP);
-            titleTMP.fontSize = 45f;
+            titleTMP.fontSize = 90f;
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.color = Color.white;
         }
@@ -231,7 +239,7 @@ public class MainMenu : MonoBehaviour
             TextMeshProUGUI tmp = txtObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             ApplyFontAndOutline(tmp);
-            tmp.fontSize = 24f;
+            tmp.fontSize = 48f;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.color = Color.white;

@@ -46,8 +46,18 @@ public class GameManager : MonoBehaviour
 
     [Header("Pengaturan Tata Letak Board (Ukuran & Posisi)")]
     public Vector2 customBoardSize = new Vector2(700f, 400f);
+    public float buttonsContainerX = 0f; // Posisi X (Geser Kiri/Kanan) kumpulan tombol
     public float buttonsContainerY = 50f; // Jarak posisi kumpulan tombol dari bawah/tengah
     public Vector2 buttonSize = new Vector2(250f, 85f);
+
+    [Header("Posisi Tombol saat Menang (X, Y)")]
+    public Vector2 winBtnLanjutPos = new Vector2(-260f, 0f);
+    public Vector2 winBtnRestartPos = new Vector2(0f, 0f);
+    public Vector2 winBtnMainMenuPos = new Vector2(260f, 0f);
+
+    [Header("Posisi Tombol saat Kalah (X, Y)")]
+    public Vector2 loseBtnRestartPos = new Vector2(-150f, 0f);
+    public Vector2 loseBtnMainMenuPos = new Vector2(150f, 0f);
 
     [HideInInspector] public int score = 0;
     [HideInInspector] public int highScore = 0;
@@ -92,11 +102,12 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        TMP_Text[] allTexts = FindObjectsOfType<TMP_Text>(true);
-        foreach(var t in allTexts)
-        {
-            ApplyFontAndOutline(t);
-        }
+        // Fitur ini dimatikan agar tidak mengubah font teks lain (seperti Dialog) secara otomatis
+        // TMP_Text[] allTexts = FindObjectsOfType<TMP_Text>(true);
+        // foreach(var t in allTexts)
+        // {
+        //     ApplyFontAndOutline(t);
+        // }
 
         ApplyBackground();
 
@@ -322,19 +333,19 @@ public class GameManager : MonoBehaviour
         btnRect.anchorMin = new Vector2(0.5f, 0f);
         btnRect.anchorMax = new Vector2(0.5f, 0f);
         btnRect.pivot = new Vector2(0.5f, 0f);
-        btnRect.anchoredPosition = new Vector2(0f, buttonsContainerY);
+        btnRect.anchoredPosition = new Vector2(buttonsContainerX, buttonsContainerY);
         btnRect.sizeDelta = new Vector2(650f, 70f);
 
         if (isWin)
         {
-            CreateButton(btnContainer.transform, "LANJUT", new Color(0.2f, 0.8f, 0.2f), new Vector2(-260f, 0f), buttonSize, btnLanjutBg, NextChapter);
-            CreateButton(btnContainer.transform, "RESTART", new Color(0.8f, 0.5f, 0.1f), new Vector2(0f, 0f), buttonSize, btnRestartBg, RestartGame);
-            CreateButton(btnContainer.transform, "MAIN MENU", new Color(0.2f, 0.5f, 0.9f), new Vector2(260f, 0f), buttonSize, btnMainMenuBg, GoToMainMenu);
+            CreateButton(btnContainer.transform, "LANJUT", new Color(0.2f, 0.8f, 0.2f), winBtnLanjutPos, buttonSize, btnLanjutBg, NextChapter);
+            CreateButton(btnContainer.transform, "RESTART", new Color(0.8f, 0.5f, 0.1f), winBtnRestartPos, buttonSize, btnRestartBg, RestartGame);
+            CreateButton(btnContainer.transform, "MAIN MENU", new Color(0.2f, 0.5f, 0.9f), winBtnMainMenuPos, buttonSize, btnMainMenuBg, GoToMainMenu);
         }
         else
         {
-            CreateButton(btnContainer.transform, "RESTART", new Color(0.8f, 0.5f, 0.1f), new Vector2(-150f, 0f), buttonSize, btnRestartBg, RestartGame);
-            CreateButton(btnContainer.transform, "MAIN MENU", new Color(0.2f, 0.5f, 0.9f), new Vector2(150f, 0f), buttonSize, btnMainMenuBg, GoToMainMenu);
+            CreateButton(btnContainer.transform, "RESTART", new Color(0.8f, 0.5f, 0.1f), loseBtnRestartPos, buttonSize, btnRestartBg, RestartGame);
+            CreateButton(btnContainer.transform, "MAIN MENU", new Color(0.2f, 0.5f, 0.9f), loseBtnMainMenuPos, buttonSize, btnMainMenuBg, GoToMainMenu);
         }
     }
 
